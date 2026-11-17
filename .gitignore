@@ -1,0 +1,7 @@
+public/dist/
+
+node_modules/
+
+.DI_Store
+Thumbs.db
+

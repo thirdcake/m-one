@@ -8,17 +8,17 @@ foreach ($file as $line) {
     $data_map->insert($data);
 }
 
-file_put_contents(__DIR__ . '/m1.json', json_encode($data_map->toArray(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+file_put_contents(__DIR__ . '/public/dist/m1.json', json_encode($data_map->toArray(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 //file_put_contents(__DIR__ . '/m1.json', json_encode($data_map->toArray()));
 
 class Data
 {
-    public string $name;
-    public string $copy;
-    public int $year;
-    public string $rank;
-    public int $order;
-    public int $final;
+    public string $name;  // コンビ名・ユニット名
+    public string $copy;  // その年のキャッチコピー
+    public int $year;     // 出場年
+    public int $rank;     // 順位
+    public int $order;    // 決勝1回戦の出演順
+    public ?int $final;   // 決勝ファイナルの出演順
 
     public function __construct(string $line)
     {
@@ -26,14 +26,15 @@ class Data
         $this->name = trim($name);
         $this->copy = trim($copy);
         $order_data = explode(' ', $order_string);
-        $year = trim($order_data[0]);
-        $this->year = (int) $year;
-        $this->rank = str_contains($order_data[1], '優勝') ? '優勝' : $order_data[1];
+        $this->year = (int) trim($order_data[0]);
+        $this->rank = str_contains($order_data[1], '優勝')
+            ? 1
+            : (int) str_replace('位', '', $order_data[1]);
         $order = $order_data[count($order_data)-1];
         $this->order = (int) str_replace('番', '', $order);
         $this->final = (str_contains($order_data[2], '最終'))
             ? (int) str_replace(['最終', '番'], ['', ''], $order_data[2])
-            : -1;
+            : null;
     }
 }
 
@@ -64,13 +65,12 @@ class DataMap
                 'name' => $data->name,
                 'data' => [],
                 'latest' => $data->year,
-                'index' => 0,
             ];
         }
         $this->name[$data->name]['data'][] = [
             'copy' => $data->copy,
             'year' => $data->year,
-            'rank' => $data->year . '年: ' . $data->rank,
+            'rank' => $data->rank,
             'order' => $data->order,
             'final' => $data->final,
         ];
@@ -88,8 +88,16 @@ class DataMap
     public function toArray():array
     {
         $name_data = [];
+        foreach($this->year as $year=>$year_data) {
+            ksort($year_data, SORT_NUMERIC);
+            $this->year[$year] = array_values($year_data);
+        }
         foreach($this->name as $data) {
             $name_data[] = $data;
+        }
+        foreach($this->final as $year=>$year_data) {
+            ksort($year_data, SORT_NUMERIC);
+            $this->final[$year] = array_values($year_data);
         }
         return [
             'year' => $this->year,
