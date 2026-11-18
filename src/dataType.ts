@@ -19,3 +19,17 @@ export type M1Data = {
     final: FinalData,
     name: NameData[],
 }
+
+export type QuestionItem = {
+    question: string,
+    hint1: string,
+    hint2: string,
+    hint3: string,
+    answer: string,
+}
+
+export type QuestionViewModel = {
+    item: QuestionItem,
+    hasNext: boolean,
+    hasPrev: boolean,
+}
