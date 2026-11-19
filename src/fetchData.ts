@@ -1,7 +1,7 @@
-export async function fetchData() {
+export async function fetchData(url: string) {
     let data = null;
     try {
-        const response = await fetch('/dist/m1.json');
+        const response = await fetch(url);
 
         // レスポンスが正常かチェック
         if (!response.ok) {

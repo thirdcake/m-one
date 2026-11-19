@@ -40,30 +40,31 @@ export class Questions {
             }
             const rank = filter[Math.floor(Math.random() * filter.length)];
             const question = `${rank.copy}`;
-            const hint1 = `${rank.year} - ${rank.rank}`;
+            const rank_jp = rank.rank === 1 ? '優勝' : `${rank.rank}位`;
+            const hint1 = `${rank.year}年: ${rank_jp}`;
             const sorted = [...combi.data].sort((a, b) => b.year - a.year);
-            const hint2 = sorted.map(rank => `${rank.year} - ${rank.copy}`).join('<br/>');
-            let hint3 = '1st round: ';
+            const hint2 = sorted.map(rank => `${rank.year}年: 「${rank.copy}」`).join('<br/>');
+            let hint3 = '<strong>1st Round:</strong><ol>';
             const prev = this.data.year?.[rank.year]?.[rank.order - 2];
             if (prev !== undefined) {
-                hint3 += `${rank.order-1}. ${prev} - `;
+                hint3 += `<li value="${rank.order-1}">${prev}</li>`;
             }
-            hint3 += `${rank.order}. ???`;
+            hint3 += '<li>「 ??? 」</li>';
             const next = this.data.year?.[rank.year]?.[rank.order];
             if (next !== undefined) {
-                hint3 += ` - ${rank.order+1}. ${next}`;
+                hint3 += `<li>${next}</li>`;
             }
+            hint3 += '</ol>';
             if (rank.final !== null) {
-                hint3 += '<br/>Final: ';
-                const prev = this.data.final?.[rank.year]?.[rank.final - 2];
-                if (prev !== undefined) {
-                    hint3 += `${rank.final-1}. ${prev} - `;
-                }
-                hint3 += `${rank.final}. ???`;
-                const next = this.data.final?.[rank.year]?.[rank.final];
-                if (next !== undefined) {
-                    hint3 += ` - ${rank.final+1}. ${next}`;
-                }
+                hint3 += '<strong>Final Round:</strong><ol>';
+                this.data.final?.[rank.year]?.forEach((v, i) => {
+                    if(i===rank.final-1) {
+                        hint3 += '<li>「 ??? 」</li>';
+                    } else {
+                        hint3 += `<li>${ v }</li>`;
+                    }
+                });
+                hint3 += '</ol>';
             }
 
             const answer = combi.name;

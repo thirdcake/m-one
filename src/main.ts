@@ -6,6 +6,8 @@ import { Questions } from "./questions";
 customElements.define('start-mode', StartMode);
 customElements.define('quiz-mode', QuizMode);
 
+const json_data_url = '/dist/m1.json';
+
 async function main() {
     const app = document.querySelector('div#app') as HTMLDivElement;
     const message = document.querySelector('div#message-text') as HTMLDivElement;
@@ -13,7 +15,7 @@ async function main() {
         console.error('dom is null');
         return;
     }
-    const data = await fetchData() as M1Data|null;
+    const data = await fetchData(json_data_url) as M1Data|null;
     if (data === null) {
         message.textContent = 'Data is null...';
         console.error('data is null.');
