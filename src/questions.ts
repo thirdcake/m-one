@@ -43,7 +43,7 @@ export class Questions {
             const rank_jp = rank.rank === 1 ? '優勝' : `${rank.rank}位`;
             const hint1 = `${rank.year}年: ${rank_jp}`;
             const sorted = [...combi.data].sort((a, b) => b.year - a.year);
-            const hint2 = sorted.map(rank => `${rank.year}年: 「${rank.copy}」`).join('<br/>');
+            const hint2 = sorted.map(r => `${r.year}年: 「${r.copy}」 ${r.rank}位`).join('<br/>');
             let hint3 = '<strong>1st Round:</strong><ol>';
             const prev = this.data.year?.[rank.year]?.[rank.order - 2];
             if (prev !== undefined) {
