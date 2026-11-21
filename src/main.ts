@@ -6,41 +6,57 @@ import { Questions } from "./questions";
 customElements.define('start-mode', StartMode);
 customElements.define('quiz-mode', QuizMode);
 
-const json_data_url = '/dist/m1.json';
 
 async function main() {
+    // wrapper DOM
     const app = document.querySelector('div#app') as HTMLDivElement;
-    const message = document.querySelector('div#message-text') as HTMLDivElement;
-    if (!app || !message) {
+    if (!app) {
         console.error('dom is null');
         return;
     }
-    const data = await fetchData(json_data_url) as M1Data|null;
+    // append views
+    const startMode = document.createElement('start-mode') as StartMode;
+    const quizMode = document.createElement('quiz-mode') as QuizMode;
+    app.appendChild(startMode);
+    app.appendChild(quizMode);
+
+    // fetch Data
+    const data = await fetchData(app.dataset.fetchurl) as M1Data|null;
     if (data === null) {
-        message.textContent = 'Data is null...';
+        startMode.errorMode('Data is null');
         console.error('data is null.');
         return;
     }
     const questions = new Questions(data);
-    const startMode = document.createElement('start-mode') as StartMode;
-    const quizMode = document.createElement('quiz-mode') as QuizMode;
-    message.remove();
-    app.appendChild(startMode);
-    startMode.addEventListener('clickStart', event => {
-        const value = (event as CustomEvent<{ value: string }>).detail.value;
-        startMode.remove();
-        questions.filter(value);
-        app.appendChild(quizMode);
-        const first = questions.next();
-        quizMode.render(first);
-    });
-    quizMode.addEventListener('clickNext', event => {
-        const next = questions.next();
-        quizMode.render(next);
-    });
-    quizMode.addEventListener('clickPrev', event => {
-        const prev = questions.prev();
-        quizMode.render(prev);
+    startMode.selectMode();
+
+    // button click event
+    app.addEventListener('click', event => {
+        const target = event.target as HTMLElement | undefined;
+        if (!target) {
+            return;
+        }
+        const button = target.closest('button') as HTMLButtonElement | undefined;
+        if (!button) {
+            return;
+        }
+        switch (button.value) {
+            case 'all':
+            case 'after-2015':
+            case 'this-year':
+                startMode.closeDialog();
+                questions.filter(button.value);
+                quizMode.render(questions.next());
+                break;
+            case 'next':
+                quizMode.render(questions.next());
+                break;
+            case 'prev':
+                quizMode.render(questions.prev());
+                break;
+            default:
+                // do nothing.
+        }
     });
 }
 

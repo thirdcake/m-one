@@ -1,35 +1,36 @@
 import { QuestionViewModel } from "./dataType";
 
 export class StartMode extends HTMLElement {
+    private dialog!: HTMLDialogElement;
     connectedCallback() {
-        this.innerHTML = `<div class="start">
-        <h2 class="start__title">対象年度を選んでください</h2>
-        <div class="start__labels">
-            <label class="start__label"><input class="start__radio" type="radio" name="filter" value="all">全期間</label>
-            <label class="start__label"><input class="start__radio" type="radio" name="filter" value="after-2015" checked>2015年以降</label>
-            <label class="start__label"><input class="start__radio" type="radio" name="filter" value="this-year">直近年</label>
-            <button class="start__button" type="button" id="start-button">スタート</button>
-        </div>
-        </div>`;
-        const startButton = this.querySelector('button#start-button') as HTMLButtonElement;
-
-        startButton?.addEventListener('click', () => {
-            const checked = this.querySelector('input[name="filter"]:checked') as HTMLInputElement | null;
-
-            if (!checked) return;
-
-            this.dispatchEvent(new CustomEvent('clickStart', {
-                detail: { value: checked.value },
-                bubbles: true,
-                cancelable: true,
-            }));
-
-        });
+        this.innerHTML = '<dialog class="start"><p class="start__text">読み込み中...</p></dialog>';
+        this.dialog = this.querySelector('dialog') as HTMLDialogElement;
+        this.dialog.showModal();
+    }
+    errorMode(message: string): void {
+        this.dialog.innerHTML = `<p class="start__text">${ message }</p>`;
+    }
+    selectMode(): void {
+        this.dialog.innerHTML = `<h2 class="start__title">M-1 クイズ</h2>
+        <p class="start__text">クイズの対象年度を選んでください。</p>
+        <button type="button" class="start__button" value="all">全期間</button>
+        <button type="button" class="start__button" value="after-2015">2015年以降</button>
+        <button type="button" class="start__button" value="this-year">直近年</button>`;
+    }
+    closeDialog(): void {
+        this.dialog.close();
     }
 }
 
 export class QuizMode extends HTMLElement {
-    render(data: QuestionViewModel) {
+    connectedCallback() {
+        this.innerHTML = '<div class="message__normal">Select Button</div>';
+    }
+    render(data: QuestionViewModel|null) {
+        if (!data) {
+            this.innerHTML = '<div class="message__error">Error!</div>';
+            return;
+        }
         const { item, hasNext, hasPrev } = data;
         this.innerHTML = `<div class="question">
             <h2 class="question__title">「${item.question}」</h2>
@@ -39,23 +40,9 @@ export class QuizMode extends HTMLElement {
             <details class="question__hint"><summary class="question__hint-title">Hint3: 前後の出番</summary><div class="question__hint-body">${item.hint3}</div></details>
             <details class="question__answer"><summary class="question__answer-title">Answer</summary><div class="question__answer-body">${item.answer}</div></details>
             <div class="question__nav">
-            <button class="question__nav-button" type="button" id="prev" ${hasPrev?'':'disabled'}>Prev</button>
-            <button class="question__nav-button" type="button" id="next" ${hasNext?'':'disabled'}>Next</button>
+            <button class="question__nav-button" type="button" value="prev" ${hasPrev?'':'disabled'}>Prev</button>
+            <button class="question__nav-button" type="button" value="next" ${hasNext?'':'disabled'}>Next</button>
             </div>
         </div>`;
-        const prevButton = this.querySelector('button#prev') as HTMLButtonElement;
-        prevButton.addEventListener('click', () => {
-            this.dispatchEvent(new CustomEvent('clickPrev', {
-                bubbles: true,
-                cancelable: true,
-            }));
-        });
-        const nextButton = this.querySelector('button#next') as HTMLButtonElement;
-        nextButton.addEventListener('click', () => {
-            this.dispatchEvent(new CustomEvent('clickNext', {
-                bubbles: true,
-                cancelable: true,
-            }));
-        });
     }
 }
